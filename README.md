@@ -11,4 +11,4 @@ JobSubmit.py can create a list of input files to Exocross. It can also queue up 
 
 ## Other files
 
-The copy of ##xcross.exe## that is include here is not the default version, as the length of acceptable filenames in the .inp files has been increased. ##submit_job.pps## is the file that the computing cluster reads to compute the job. 
+The copy of **xcross.exe** that is include here is not the default version, as the length of acceptable filenames in the .inp files has been increased. **submit_job.pps** is the file that the computing cluster reads to compute the job. 
