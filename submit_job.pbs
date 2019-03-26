@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -A dp015
+##### #PBS -q devel
+#PBS -l nodes=1:ppn=36
+#PBS -o output.txt
+#PBS -e errors.txt
+#PBS -l walltime=04:00:00
+#PBS -M rr364@exeter.ac.uk
+#PBS -N AbsCoeff
+
+# Run on # nodes specified above with 1 MPI process and 12 OpenMP threads per
+# node. For hyperthreading set OMP_NUM_THREADS to 24 but leave ppn=12 above.
+export NUMBEROFNODES=$PBS_NUM_NODES
+export NUMPROCS=$PBS_NUM_NODES
+export OMP_NUM_THREADS=$PBS_NUM_PPN
+# export OMP_STACKSIZE=16000000
+
+
+module load intel/compilers/18.0.1
+module load intel/mpi/18.0.1
+# Change into the directory the job was submitted from
+cd ${PBS_O_WORKDIR}
+
+# Run the executable and redirect the output to a file
+# Replace my_bin with the name of your executable
+# mpdboot -n $NUMBEROFNODES -r ssh -f $PBS_NODEFILE
+# mpiexec -perhost 1 -genv I_MPI_DEVICE rdssm:OpenIB-cma -genv I_MPI_PIN_DOMAIN omp -np $NUMPROCS ../bin/absCoeff.exe ${param_file} > dump_${param_file}.txt
+# mpdallexit
+
+
+./xcross.exe < ${param_file} > output_${param_file}.out
