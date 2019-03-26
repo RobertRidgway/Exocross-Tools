@@ -49,8 +49,8 @@ def JobSubmit(species,PTPairs,range_,maxJobs=100,forceRecreation=False):
         pressure= PTPairs[0][i]
         temperature = PTPairs[1][i]
     
-        filenameInp='{0}_{1}_{2}_{3}_{4}_{5}.inp'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
-        filenameXsec='{0}_{1}_{2}_{3}_{4}_{5}.xsec'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
+        filenameInp='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}.inp'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
+        filenameXsec='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}.xsec'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
         numJobs=JobCount()
         # Only submits job if file 
         if not os.path.isfile(filenameXsec) or forceRecreation:
