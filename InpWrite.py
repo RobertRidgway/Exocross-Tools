@@ -103,12 +103,12 @@ class Species(object):
 
 
 # Takes pressure in Bar, temperature in K
-def InpWrite(speciesInfo,temperature,pressure,npoints,range_,offset=25, peturbers=None,homedir=os.getcwd()):
+def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, peturbers=None,homedir=os.getcwd()):
     
     if homedir[-1] != '/':
         homedir=homedir+'/'
 
-    filename=homedir+'{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}.inp'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1])
+    filename=homedir+'{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}.inp'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note)
     #print(filename)
     fileInp=open(filename,'w')
 

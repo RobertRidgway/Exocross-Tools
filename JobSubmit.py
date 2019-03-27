@@ -33,24 +33,24 @@ def QSubmit(input_file,species,idx):
 
 
 # Creates a list of .inp files for use with Exocross
-def InpCreate(species, PTidx,PTPairs,npoints,range_,broadeners):
+def InpCreate(species, PTidx,PTPairs,npoints,range_,broadeners,note=''):
     # Create .inp files
     for i in range(len(PTPairs[0])):
         pressure= PTPairs[0][i]
         temperature = PTPairs[1][i]
         print(PTidx[i],PTPairs[0][i],PTPairs[1][i])
-        InpW.InpWrite(species,temperature,pressure,npoints,range_,peturbers=broadeners)
+        InpW.InpWrite(species,temperature,pressure,npoints,range_,peturbers=broadeners,note=note)
     return None
 
 
 # Submits jobs to the queue
-def JobSubmit(species,PTPairs,range_,maxJobs=100,forceRecreation=False):
+def JobSubmit(species,PTPairs,range_,maxJobs=100,forceRecreation=False,note=''):
     for i in range(len(PTPairs[0]))[:1]:
         pressure= PTPairs[0][i]
         temperature = PTPairs[1][i]
     
-        filenameInp='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}.inp'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
-        filenameXsec='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}.xsec'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1])
+        filenameInp='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}.inp'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1],note)
+        filenameXsec='{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}.xsec'.format(species.molecule,species.source,temperature,pressure,range_[0],range_[1],note)
         numJobs=JobCount()
         # Only submits job if file 
         if not os.path.isfile(filenameXsec) or forceRecreation:
@@ -126,12 +126,12 @@ T=[Tmin,Tmax]
 PT_idx,PTPairs=PTGen(num_P,num_T,P,T)
 
 npoints=412001
-broadeners=[H2.String,He.String]
-
-InpCreate(H2O, PT_idx,PTPairs,npoints,range_,broadeners)
+broadeners=[air.String]
+note='_air'
+InpCreate(H2O, PT_idx,PTPairs,npoints,range_,broadeners,note=note)
 
 # Loop for submitting jobs
 
-JobSubmit(H2O,PTPairs,range_)
+JobSubmit(H2O,PTPairs,range_,note=note)
 
 
