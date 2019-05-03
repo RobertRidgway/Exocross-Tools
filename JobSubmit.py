@@ -7,7 +7,7 @@ import subprocess
 # Counts the number of active jobs
 def JobCount(user='dc-ridg1'):
     var = os.popen('qstat -u {0} > test_count.txt ; grep -rnc "./test_count.txt" -e "{0}"'.format(user)).read()
-    os.popen('rm test_count.txt')
+    #os.popen('rm test_count.txt')
     return int(var)
 
 # Generates a list of PT points
@@ -33,19 +33,19 @@ def QSubmit(input_file,species,idx):
 
 
 # Creates a list of .inp files for use with Exocross
-def InpCreate(species, PTidx,PTPairs,npoints,range_,broadeners,note=''):
+def InpCreate(species, PTidx,PTPairs,npoints,range_,broadeners,offset=25,note=''):
     # Create .inp files
     for i in range(len(PTPairs[0])):
         pressure= PTPairs[0][i]
         temperature = PTPairs[1][i]
         print(PTidx[i],PTPairs[0][i],PTPairs[1][i])
-        InpW.InpWrite(species,temperature,pressure,npoints,range_,peturbers=broadeners,note=note)
+        InpW.InpWrite(species,temperature,pressure,npoints,range_,peturbers=broadeners,offset=offset,note=note)
     return None
 
 
 # Submits jobs to the queue
 def JobSubmit(species,PTPairs,range_,maxJobs=100,forceRecreation=False,note=''):
-    for i in range(len(PTPairs[0]))[:1]:
+    for i in range(len(PTPairs[0])):
         pressure= PTPairs[0][i]
         temperature = PTPairs[1][i]
     
@@ -73,8 +73,13 @@ def JobSubmit(species,PTPairs,range_,maxJobs=100,forceRecreation=False,note=''):
     print('All jobs have been submitted!')
     return None
 
-
+#
+#
+#
 ###### End of Functions, work area is below
+#
+#
+#
 
 
 
@@ -92,7 +97,7 @@ He.UpdateVars(species='He',gamma=0.043,n=0.02,t0=298.0,
 He.StringCreate()
 
 
-## Air is assuming nitrogen dominated
+## Air is assuming nitrogen dominated atmosphere
 air=InpW.Peturber()
 air.UpdateVars(species='air',t0=298.0, file='NewSpecies/LineWidths/H2O/1H2-16O__air_a0.broad',
                model='J', ratio = 1.0)
@@ -120,14 +125,29 @@ Pmax=1e3
 Tmin=70
 Tmax=6000
 
+
+
+# 1 Bar = 10^5 Pa
+# 1 Pa = 10^-5 Bar
+# Matches Davids PT800 file
+
+num_P=40
+num_T=20
+range_=[0.0005,41199.9995]
+Pmin = 7.8804628e-05*1e-5 
+Pmax = 1e3 # 10^8 Pa
+Tmin=70
+Tmax=3000
 P=[Pmin,Pmax]
 T=[Tmin,Tmax]
 
 PT_idx,PTPairs=PTGen(num_P,num_T,P,T)
 
-npoints=412001
-broadeners=[air.String]
-note='_air'
+
+range_=[0.0005,41199.9995]
+npoints=41200001 # 0.1 m-1 spacing
+broadeners=[H2.String,He.String]
+note='_HotJupiterHiRez'
 InpCreate(H2O, PT_idx,PTPairs,npoints,range_,broadeners,note=note)
 
 # Loop for submitting jobs

@@ -101,6 +101,21 @@ class Species(object):
         self.transitions=files
         return True
 
+# Rounds up to the next multiple of 100
+# This is used assuming 100 cm-1 spacing is used for .trans files
+def roundup(x):
+    if x % 100 ==0:
+        return x
+    else:
+        return x +100 - x % 100
+
+# Rounds down to the next multiple of 100
+def rounddown(x):
+    if x %100 ==0:
+        return max(x,0)
+    else:
+        x= x-x % 100
+        return max(0,x)
 
 # Takes pressure in Bar, temperature in K
 def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, peturbers=None,homedir=os.getcwd()):
@@ -113,12 +128,14 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
     fileInp=open(filename,'w')
 
     fileInp.write('temperature {0} (K)\n'.format(float(temperature)))
-    fileInp.write('pressure {0} (bar)\n'.format(float(pressure)))
+    fileInp.write('pressure {0} (bar)\n\n'.format(float(pressure)))
     fileInp.write('range {0},{1} (cm-1)\n'.format(range_[0],range_[1]))
-    fileInp.write('npoints {0}\n\n'.format(npoints))
+    fileInp.write('npoints {0}\n'.format(npoints))
 
+    fileInp.write('mem 12 GB\n')
+    fileInp.write('Ncache 10000000\n')
     fileInp.write('absorption\nthreshold 0\nVoi-Fnorm\n')
-    fileInp.write('output {0}_{1}_{2}_{3}_{4}\n'.format(speciesInfo.molecule,temperature,pressure,range_[0],range_[1]))
+    fileInp.write('output {0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}\n'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note))
 
     fileInp.write('nprocs 36\n')
 
@@ -132,9 +149,11 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
     ## Writes Transitions
     ## Finds all fies within a certain window around the range
     ## Takes into account offset
-    rangemin=range_[0]-1.5*offset
-    rangemax=range_[1]+1.5*offset
+    rangemin=range_[0]
+    rangemax=range_[1]
     
+    rangemin=rounddown(range_[0])
+    rangemax=roundup(range_[1])
     files=[]
     for file_ in speciesInfo.transitions:
         line=os.path.splitext(os.path.basename(file_))[0]
