@@ -1,0 +1,144 @@
+import numpy as np
+import netCDF4 as nc
+import os
+import XsecConvert as XC
+
+
+# Get list of .xsec files for conversion into .npy files
+
+
+homedir='/home/dc-ridg1/RunningExocross/InpWriting/'
+
+absdir='/home/dc-ridg1/AbsCoeffs/'
+
+datadir='/data/dp015/dc-ridg1/NewSpecies/AbsCoeffs/H2O/'
+xsecfolder=homedir+'Inps/LowRez/'
+npyfolder='Npys_H2O_POKAZATEL_LowRez/'
+files_all=os.listdir(xsecfolder)
+
+
+
+files=[]
+for file_ in files_all:
+    fname, ext=os.path.splitext(file_)
+    if file_.endswith('.xsec'):
+        
+        fnamenpy=fname+'.npy'
+        if not os.path.isfile(npyfolder+fnamenpy):
+            print('Converting {0} to .npy format.'.format(file_))
+            XC.Convert(xsecfolder,file_,savedir=npyfolder)
+    #elif file_.endswith('.inp') and not os.path.isfile(xsecfolder+fname+'.xsec'):
+#        if 'e-06' in fname:
+#            print(file_)
+
+        
+# File format is wavenumber (cm-1) and absorption coeff (m^2/kg)        
+
+print('Getting list of .npy files')
+files_npy=os.listdir(npyfolder)
+
+temp_list=[]
+pressure_list=[]
+abscoeff_list=[]
+for file_ in files_npy:
+    print('Loading ',file_)
+    fname,ext=os.path.splitext(file_)
+    fname=fname.split('_')
+    temp=float(fname[2])
+    pressure=float(fname[3])
+    temp_list.append(temp)
+    pressure_list.append(pressure)
+    filenp=np.load(npyfolder+file_)
+    nu, absc = filenp[0]*100,filenp[1] # m^{-1}, m^2/kg
+    abscoeff_list.append(absc)
+
+temp_list=np.array(temp_list)
+pressure_list=np.array(pressure_list)
+abscoeff_list=np.array(abscoeff_list)
+
+idx_P=np.argsort(pressure_list)
+
+temp_list=temp_list[idx_P]
+pressure_list=pressure_list[idx_P]
+abscoeff_list=abscoeff_list[idx_P]
+temp_ss=[]
+pressure_ss=[]
+abs_ss=[]
+npoints_T=20
+
+proper_nu_length=len(abscoeff_list[0])
+for pressure in np.unique(pressure_list):
+    # List of pressure indices 
+    idx=np.where(pressure_list == pressure)
+    #print(idx)
+    temp_slice=temp_list[idx]
+    if (npoints_T - len(temp_slice)) > 1: 
+        print('{0:.3e} Bar is missing {1} points, skipping.'.format(pressure,40-len(temp_slice)))
+        continue
+    elif (npoints_T - len(temp_slice)) ==1:
+        print('{0:.3e} Bar is missing {1} point, skipping.'.format(pressure,40-len(temp_slice)))
+        continue
+    #print('{0:.3e} Bar has all {1} points, adding to the .nc.'.format(pressure,len(temp_slice)))
+    abs_slice=abscoeff_list[idx]
+    
+    idx_t=np.argsort(temp_slice)
+    temp_slice=temp_slice[idx_t]
+    abs_slice=abs_slice[idx_t]
+    #print(pressure,len(temp_slice),len(abs_slice),len(abs_slice[0]))
+    for i in range(len(temp_slice)):
+        pressure_ss.append(pressure)
+        temp_ss.append(temp_slice[i])
+        if len(abs_slice[i]) != (proper_nu_length):
+            print(pressure,temp_slice[i],len(abs_slice[i]))
+        abs_ss.append(abs_slice[i])
+    
+pressure_ss=np.array(pressure_ss)
+temp_ss=np.array(temp_ss)
+abs_ss=np.array(abs_ss)
+
+# Okay, so they're all in .npy format for easy access, now what?
+
+# Let's make a .nc file for them!
+
+fname='abs_coeff_H2O_POKAZATEL_pt800_LowRez.nc'
+fnc=nc.Dataset(absdir+fname,'w')
+
+scalar_dim=fnc.createDimension('scalar',1)
+nu_dim=fnc.createDimension('nu',proper_nu_length)
+pt_pair_dim=fnc.createDimension('pt_pair',len(temp_ss))
+
+
+nu_var=fnc.createVariable('nu','f8',('nu',))
+kabs=fnc.createVariable('kabs','f4',('pt_pair','nu',))
+t_calc= fnc.createVariable('t_calc','f8',('pt_pair',))
+p_calc= fnc.createVariable('p_calc','f8',('pt_pair',))
+
+nu_var[:]=nu
+print(nu[1]-nu[0])
+nu_var.step=abs(nu[1]-nu[0])
+#nu_var.step=10.0 # Equivalent to 0.1 in cm-1
+
+for i in range(len(pressure_ss)):
+    print(i,800)
+    t_calc[i]=temp_ss[i]
+    p_calc[i]=pressure_ss[i]*1e5 # Bar to Pa
+    #for j in range(1,len(abs_ss[i])):
+    #    kabs[i,j]=abs_ss[i][j]
+    #print(i,pressure_ss[i])
+    kabs[i,:] = abs_ss[i]
+    
+    #print(kabs[i,:])
+    #print(abs_ss[i])
+
+
+fnc.close()
+print('File written to: {0}'.format(absdir+fname))
+import shutil
+shutil.copy(absdir+fname,datadir+fname)
+
+    
+    
+
+
+
+
