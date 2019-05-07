@@ -1,13 +1,11 @@
 # Converts cm^2/molecule to m^2/kg
-
-import astropy.units as units
 import numpy as np
 import os
 # Mass of water in AMU
 
-waterMass=18.02*1.6726e-27
 
-def Convert(Xsecfolder,fileXsec,savedir=os.getcwd()):
+
+def Convert(Xsecfolder,fileXsec,mass,savedir=os.getcwd()):
     if savedir[-1] != '/':
         savedir=savedir+'/'
     filename,extension=os.path.splitext(fileXsec)
@@ -28,7 +26,9 @@ def Convert(Xsecfolder,fileXsec,savedir=os.getcwd()):
        # print(line)
         line = [float(line[i]) for i in range(len(line))]
        # print(line)
-        line[1]= line[1]/(1e4*waterMass)
+
+        # Converts cm^2/molecule to m^2/kg
+        line[1]= line[1]/(1e4*mass)
         #print(line)
         wavenumber.append(line[0])
         crosssection.append(line[1])

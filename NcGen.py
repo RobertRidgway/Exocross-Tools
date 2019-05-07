@@ -9,7 +9,7 @@ import XsecConvert as XC
 
 # Converts .xsec files into .npy files, and then creates a .nc 
 # for use in corr-k and SOCRATES/ATMO
-def NcCreate(fname,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoints_T=20):
+def NcCreate(fname,mass,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoints_T=20):
     files_all=os.listdir(xsecfolder)
     files=[]
     count=0
@@ -20,7 +20,7 @@ def NcCreate(fname,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoi
             count+=1
             if not os.path.isfile(npyfolder+fnamenpy):
                 print(count,'Converting {0} to .npy format.'.format(file_))
-                XC.Convert(xsecfolder,file_,savedir=npyfolder)
+                XC.Convert(xsecfolder,file_,mass,savedir=npyfolder)
     # File format is wavenumber (cm-1) and absorption coeff (m^2/kg)        
     print('Getting list of .npy files')
     files_npy=os.listdir(npyfolder)
@@ -131,8 +131,8 @@ datadir='/data/dp015/dc-ridg1/NewSpecies/AbsCoeffs/H2O/'
 xsecfolder=homedir+'Results/POKAZATEL_HiRez/'
 npyfolder=homedir+'npys/POKAZATEL_HiRez/'
 filename='abs_coeff_H2O_POKAZATEL_pt800.nc'
-
-NcCreate(filename,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoints_T=20)
+waterMass=18.02*1.6726e-27
+NcCreate(filename,waterMass,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoints_T=20)
 
 import shutil
 shutil.copy(absdir+fname,datadir+fname)
