@@ -4,8 +4,18 @@ import netCDF4 as nc
 
 def CombineCDFs(output,files,ratios,absdir):
     
+    ratios=np.array(ratios)
+    norm=np.dot(ratios,ratios)**0.5
+    ratios=ratios/norm
+
+    for ratio in ratios:
+        if ratio < 0:
+            print('One of the fractions is negative!')
+            return False
+
     # Assumes shape is identical over all files
-    
+
+
     fnc=nc.Dataset(absdir+output,'w')
 
     # For dimensions and shapes
@@ -20,8 +30,11 @@ def CombineCDFs(output,files,ratios,absdir):
     t_calc= fnc.createVariable('t_calc','f8',('pt_pair',))
     p_calc= fnc.createVariable('p_calc','f8',('pt_pair',))
 
+    nu_var[:]=file_['nu'][:]
     t_calc[:]=file_['t_calc'][:]
     p_calc[:]=file_['p_calc'][:]
+    nu_var.step= abs(file_['nu'][1]-file_['nu'][0])
+    print(nu_var.step)
     file_.close()
 
     # Puts all ncs into memory to save time
@@ -57,12 +70,15 @@ files=[]
 for i in [46,47,48,49,50]:
     filename='abs_coeff_{0}Ti-16O_Toto_pt800.nc'.format(i)
     files.append(filename)
+
+# Source for abundances: 
+# https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl
 ratios=[0.0825,
         0.0744,
         0.7372,
         0.0541,
         0.0518]
 
-filename='abs_coeff_TiO_Toto_EarthIsotopicComposition_pt800.nc'
+filename='abs_coeff_TiO_Toto_SolarMetallicity_pt800.nc'
 
 CombineCDFs(filename,files,ratios,absdir)
