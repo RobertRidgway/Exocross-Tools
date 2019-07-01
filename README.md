@@ -16,10 +16,10 @@ This script will convert the .xsec output files from Exocross into a .npy format
 
 ## Other files
 
-The copy of **xcross.exe** that is included here is not the default version, as the length of acceptable filenames in the .inp files has been increased. **submit_job.pps** is the file that the computing cluster reads to compute the job. 
+The copy of **xcross.exe** that is included here is not the default version, as the length of acceptable filenames in the .inp files has been increased. **submit_job.pbs** is the file that the computing cluster reads to compute the job. 
 
 # How to use these files
 
-After downloading the files that ExoCross needs for the molecule you wish to calculate absorption coefficients for (.states, .trans, etc), place **JobSubmit.py** and **InWrite.py** in the folder where you want your output **.xsec** files to go. The input **.inp** files will be created here. Run **JobSubmit.py** and it will submit the jobs and create your files.
+After downloading the files that ExoCross needs for the molecule you wish to calculate absorption coefficients for (.states, .trans, etc), place **JobSubmit.py**, **InWrite.py**, **xcross.exe**, and **submit_job.pbs** in the folder where you want your output **.xsec** files to go. The input **.inp** files will be created here. Run **JobSubmit.py** and it will submit the jobs and create your files.
 
 Edit **submit_job.pbs** for the estimated computation time required.
