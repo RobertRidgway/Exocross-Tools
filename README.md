@@ -21,3 +21,5 @@ The copy of **xcross.exe** that is included here is not the default version, as 
 # How to use these files
 
 After downloading the files that ExoCross needs for the molecule you wish to calculate absorption coefficients for (.states, .trans, etc), place **JobSubmit.py** and **InWrite.py** in the folder where you want your output **.xsec** files to go. The input **.inp** files will be created here. Run **JobSubmit.py** and it will submit the jobs and create your files.
+
+Edit **submit_job.pbs** for the estimated computation time required.
