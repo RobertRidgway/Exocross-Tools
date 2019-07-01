@@ -121,7 +121,7 @@ def NcCreate(filename,mass,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P
     PTnum=npoints_P*npoints_T
     print('Loading .npy files and placing into .nc file.')
     for i in range(0,len(pressure_ss)):
-        print(i,PTnum)
+        print(i,PTnum,fname_ss[i])
         filenp=np.load(npyfolder+fname_ss[i])
         nu, absc = filenp[0]*100,filenp[1] # m^{-1}, m^2/kg
         t_calc[i]=temp_ss[i]

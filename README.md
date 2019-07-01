@@ -8,7 +8,16 @@ InpWrite.py contains functions assisting in the creation of an input (.inp) file
 
 JobSubmit.py can create a list of input files to Exocross. It can also queue up the jobs for submission to a computing cluster. 
 
+## NcGen.py
+
+This script will convert the .xsec output files from Exocross into a .npy format, and then combine them into a netCDF file for later use.
+
+
 
 ## Other files
 
-The copy of **xcross.exe** that is include here is not the default version, as the length of acceptable filenames in the .inp files has been increased. **submit_job.pps** is the file that the computing cluster reads to compute the job. 
+The copy of **xcross.exe** that is included here is not the default version, as the length of acceptable filenames in the .inp files has been increased. **submit_job.pps** is the file that the computing cluster reads to compute the job. 
+
+# How to use these files
+
+After downloading the files that ExoCross needs for the molecule you wish to calculate absorption coefficients for (.states, .trans, etc), place **JobSubmit.py** and **InWrite.py** in the folder where you want your output **.xsec** files to go. The input **.inp** files will be created here. Run **JobSubmit.py** and it will submit the jobs and create your files.
