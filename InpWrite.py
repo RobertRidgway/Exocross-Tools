@@ -42,12 +42,12 @@ class Peturber(object):
         if self.species is None:
             print('The peturbing species is not defined!')
             return False
-        elif self.model is None:
-            print('The peturbing model is not defined!')
-            return False
-        elif self.file is None:
-            print('The file containing the broadening terms is not defined!')
-            return False
+        #elif self.model is None:
+        #    print('The peturbing model is not defined!')
+        #    return False
+        #elif self.file is None:
+        #    print('The file containing the broadening terms is not defined!')
+        #    return False
         elif self.ratio is None:
             print('The abundance ratio for the peturber is not defined!')
             return False
@@ -60,9 +60,12 @@ class Peturber(object):
             self.String += 't0 {0} '.format(self.t0)
         if self.p0 is not None:
             self.String += 'p0 {0} '.format(self.p0)
-        self.String += 'file {0} '.format(self.file)
-        self.String += 'model {0} '.format(self.model)
-        self.String += 'ratio {0}'.format(self.ratio)
+        if self.file is not None:
+            self.String += 'file {0} '.format(self.file)
+        if self.model is not None:
+            self.String += 'model {0} '.format(self.model)
+        if self.ratio is not None:
+            self.String += 'ratio {0}'.format(self.ratio)
         return True
 
 # Class for the species we want to create absorption coefficients for 
@@ -123,19 +126,20 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
     if homedir[-1] != '/':
         homedir=homedir+'/'
 
-    filename=homedir+'{0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}.inp'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note)
+    filename=homedir+'{0}_{1}_{2:8.7e}_{3:8.7e}_{4}_{5}{6}.inp'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note)
     #print(filename)
     fileInp=open(filename,'w')
 
-    fileInp.write('temperature {0} (K)\n'.format(float(temperature)))
-    fileInp.write('pressure {0} (bar)\n\n'.format(float(pressure)))
+    fileInp.write('temperature {0:8.7e} (K)\n'.format(float(temperature)))
+    fileInp.write('pressure {0:8.7e} (bar)\n\n'.format(float(pressure)))
     fileInp.write('range {0},{1} (cm-1)\n'.format(range_[0],range_[1]))
     fileInp.write('npoints {0}\n'.format(npoints))
 
+    #fileInp.write('offset {0}\n'.format(offset))
     fileInp.write('mem 12 GB\n')
     fileInp.write('Ncache 10000000\n')
     fileInp.write('absorption\nthreshold 0\nVoi-Fnorm\n')
-    fileInp.write('output {0}_{1}_{2:6.3e}_{3:6.3e}_{4}_{5}{6}\n'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note))
+    fileInp.write('output {0}_{1}_{2:8.7e}_{3:8.7e}_{4}_{5}{6}\n'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note))
 
     fileInp.write('nprocs 36\n')
 
@@ -157,15 +161,24 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
     files=[]
     for file_ in speciesInfo.transitions:
         line=os.path.splitext(os.path.basename(file_))[0]
-        line=line.split('__')[2]
-        line=line.split('-')
-        rmin=int(line[0])
-        rmax=int(line[1])
-        if (rmin >= rangemax or rmax <= rangemin):
-            pass
-        else:
+        if speciesInfo.molecule != line[:len(speciesInfo.molecule)]:
+           
+            continue
+        line=line.split('__')
+        # Presumably in form of species__source__rangemin-rangmax.trans
+        if len(line) > 2:
+            line=line[2]
+            line=line.split('-')
+            rmin=int(line[0])
+            rmax=int(line[1])
+            if (rmin >= rangemax or rmax <= rangemin):
+                pass
+            else:
+                files.append(file_)
+        else: # Files without mins or maxes
             files.append(file_)
-
+            
+        
     if len(files)==1:
         fileInp.write('Transitions {0}\n'.format(files[0]))
     else:
