@@ -142,21 +142,26 @@ def NcCreate(filename,mass,homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P
 import shutil
 homedir='/home/dc-ridg1/data/Exocross/'
 absdir='/home/dc-ridg1/AbsCoeffs/'
-datadir='/data/dp015/dc-ridg1/NewSpecies/AbsCoeffs/TiO/'
+datadir='/data/dp015/dc-ridg1/NewSpecies/AbsCoeffs/AlO/'
 
+
+AlCount=[26,27,27,27]
+OCount=[16,16,17,18]
 
 # https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl
-Omass=15.99491461956
-masses= [45.9526316,
-         46.9517631,
-         47.9479463,
-         48.9478700,
-         49.9447912]
-masses=(np.array(masses)+Omass)*1.6726e-27
+# in Da
+masses=[41.981807, # 26Al-16O
+        42.976454, # 27Al-16O
+        43.980671, # 27Al-17O
+        44.980700] # 27Al-18O
+Da_kg=1.660539e-27
+masses=(np.array(masses))*Da_kg
 for i in range(0,len(masses)):
-    xsecfolder=homedir+'Results/TiO_Toto/{0}Ti-16O/'.format(i+46)
-    npyfolder=homedir+'npys/TiO_Toto/{0}Ti-16O/'.format(i+46)
-    filename='abs_coeff_{0}Ti-16O_Toto_pt800.nc'.format(i+46)
+    Al=AlCount[i]
+    O=OCount[i]
+    xsecfolder=homedir+'Results/AlO_ATP/{0}Al-{1}O/'.format(Al,O)
+    npyfolder=homedir+'npys/AlO_ATP/{0}Al-{1}O/'.format(Al,O)
+    filename='abs_coeff_{0}Al-{1}O_ATP_pt800.nc'.format(Al,O)
     NcCreate(filename,masses[i],homedir,absdir,datadir,xsecfolder,npyfolder,npoints_P=40,npoints_T=20)
     shutil.copy(absdir+filename,datadir+filename)
 
