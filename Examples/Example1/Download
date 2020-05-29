@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+wget http://exomol.com/db/CaO/40Ca-16O/VBATHY/40Ca-16O__VBATHY.def
+
+wget http://exomol.com/db/CaO/40Ca-16O/VBATHY/40Ca-16O__VBATHY.{states,trans}.bz2
+
+bunzip2 *.bz2
+
+wget http://exomol.com/db/CaO/40Ca-16O/VBATHY/40Ca-16O__VBATHY.pf
+

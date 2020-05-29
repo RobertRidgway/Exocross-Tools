@@ -1,8 +1,6 @@
 import os
 import glob
 
-folder_base='/data/dp015/dc-ridg1/'
-
 class Peturber(object):
 
     def __init__(self):
@@ -30,7 +28,7 @@ class Peturber(object):
             elif key == 'model':
                 self.model = value
             elif key == 'file':
-                self.file = folder_base+value
+                self.file = value
             elif key == 'ratio':
                 self.ratio = value
             else:
@@ -85,11 +83,11 @@ class Species(object):
             elif key =='source':
                 self.source=value
             elif key == 'states':
-                self.states=folder_base+value
+                self.states=value
             elif key == 'mass':
                 self.mass=value
             elif key == 'pffile':
-                self.pffile=folder_base+value
+                self.pffile=value
             else:
                 print('{0} is not recognized as a variable'.format(key))
         return None
@@ -99,7 +97,7 @@ class Species(object):
 
     def UpdateTransitions(self, folder):
         # List of files
-        files=glob.glob(folder_base+folder+'*.trans')
+        files=glob.glob(folder+'*.trans')
         files.sort()
         self.transitions=files
         return True
