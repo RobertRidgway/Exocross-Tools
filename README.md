@@ -23,3 +23,27 @@ The copy of **xcross.exe** that is included here is not the default version, as 
 After downloading the files that ExoCross needs for the molecule you wish to calculate absorption coefficients for (.states, .trans, etc), place **JobSubmit.py**, **InWrite.py**, **xcross.exe**, and **submit_job.pbs** in the folder where you want your output **.xsec** files to go. The input **.inp** files will be created here. Run **JobSubmit.py** and it will submit the jobs and create your files.
 
 Edit **submit_job.pbs** for the estimated computation time required.
+
+[Inprogress]
+
+
+# Running Exocross Tools
+
+Please note that this tool set assumes you're running on a system which uses PBS for job submission.
+
+1. Identify which species you want to calculate opacity coefficients for.
+2. From the species page on Exomol, identify the Linelist you wish to use
+3. Identify any isotopologues you wish to include.
+4. For each isotopologue, look at the .def files for:
+    1. Molecule mass
+    2. Maximum wavenumber
+    3. Default Lorentztian HWHM
+    4. Default Temperature Exponent
+    5. Maximum temperature in the Partition Function file (.pf)
+5. Between the isotopologues, determine the maximum wavenumber you wish to use. If you want to combine them together, the maximum wavenumber needs to be the same for all isotopologues. 
+6. Download and unzip all .states and .trans files to a folder of your choice.
+7. Download the .pf file. 
+    1. If the file does not exist or the maximum temperature is insufficient, you will need to create one
+6. Modify JobSubmit.py by:
+   1. 
+7. hello
