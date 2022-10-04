@@ -48,10 +48,11 @@ def CombineCDFs(output,files,ratios,absdir):
     # Iterates over all PT points and weights them according 
     # to the supplied ratios
     for i in range(0,pt_num):
-        print(i,pt_num,end='\r',flush=True)
+        print(i,pt_num,flush=True)
         file_=filesNC[0]
         kabs_weighted=np.array(file_['kabs'][i,:])*ratios[0]
         for j in range(1,len(files)):
+            print(i,pt_num,j,flush=True)
             file_=filesNC[j]
             kabs_weighted+=np.array(file_['kabs'][i,:])*ratios[j]
         kabs[i,:]=kabs_weighted
@@ -78,22 +79,22 @@ TiAbundances={'46': 0.0825, '47': 0.0744, '48': 0.7372, '49': 0.0541, '50': 0.05
 MgAbundances={'24': 0.7899, '25': 0.1000, '26':0.1101}
 
 
-# NaH
-ratios_NaH=[]
-HCount=[1,2]
-NaCount=[23,23]
-files_NaH=[]
-for i in range(len(HCount)):
-    Na=NaCount[i]
-    H=HCount[i]
-    abund=NaAbundances[str(Na)]*HAbundances[str(H)]
-    ratios_NaH.append(abund)
-    filename='abs_coeff_{0}Na-{1}H_Rivlin_pt800.nc'.format(Na,H)
-    files_NaH.append(filename)
+# MgH
+ratios_MgO=[]
+OCount=[16,16,16,17,18]
+MgCount=[24,25,26,24,24]
+files_MgO=[]
+for i in range(len(OCount)):
+    Mg=MgCount[i]
+    O=OCount[i]
+    abund=MgAbundances[str(Mg)]*OAbundances[str(O)]
+    ratios_MgO.append(abund)
+    filename='abs_coeff_{0}Mg-{1}O_LiTY_pt800.nc'.format(Mg,O)
+    files_MgO.append(filename)
 
 absdir='/home/dc-ridg1/AbsCoeffs/'
-filename_NaH='abs_coeff_NaH_Rivlin_TerrestrialAbund_pt800.nc'
-CombineCDFs(filename_NaH,files_NaH,ratios_NaH,absdir)
+filename_MgO='abs_coeff_MgO_LiTY_TerrestrialAbund_pt800.nc'
+CombineCDFs(filename_MgO,files_MgO,ratios_MgO,absdir)
 
 # Source for abundances: 
 # https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl

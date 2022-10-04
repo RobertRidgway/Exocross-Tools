@@ -1,6 +1,8 @@
 import os
 import glob
 
+folder_base='/data/dp015/dc-ridg1/'
+
 class Peturber(object):
 
     def __init__(self):
@@ -28,7 +30,7 @@ class Peturber(object):
             elif key == 'model':
                 self.model = value
             elif key == 'file':
-                self.file = value
+                self.file = folder_base+value
             elif key == 'ratio':
                 self.ratio = value
             else:
@@ -83,11 +85,11 @@ class Species(object):
             elif key =='source':
                 self.source=value
             elif key == 'states':
-                self.states=value
+                self.states=folder_base+value
             elif key == 'mass':
                 self.mass=value
             elif key == 'pffile':
-                self.pffile=value
+                self.pffile=folder_base+value
             else:
                 print('{0} is not recognized as a variable'.format(key))
         return None
@@ -97,7 +99,7 @@ class Species(object):
 
     def UpdateTransitions(self, folder):
         # List of files
-        files=glob.glob(folder+'*.trans')
+        files=glob.glob(folder_base+folder+'*.trans')
         files.sort()
         self.transitions=files
         return True
@@ -119,7 +121,7 @@ def rounddown(x):
         return max(0,x)
 
 # Takes pressure in Bar, temperature in K
-def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, peturbers=None,homedir=os.getcwd()):
+def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, peturbers=None,homedir=os.getcwd(), UseSupers=False):
     
     if homedir[-1] != '/':
         homedir=homedir+'/'
@@ -134,10 +136,94 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
     fileInp.write('npoints {0}\n'.format(npoints))
 
     #fileInp.write('offset {0}\n'.format(offset))
-    fileInp.write('mem 12 GB\n')
+    fileInp.write('mem 20 GB\n')
     fileInp.write('Ncache 10000000\n')
     fileInp.write('absorption\nthreshold 0\nVoi-Fnorm\n')
     fileInp.write('output {0}_{1}_{2:8.7e}_{3:8.7e}_{4}_{5}{6}\n'.format(speciesInfo.molecule,speciesInfo.source,temperature,pressure,range_[0],range_[1],note))
+
+    fileInp.write('nprocs 36\n')
+
+    ####### Species info and lists of files for States, Partition Function
+    ####### and Transitions
+
+    fileInp.write('States {0}\n'.format(speciesInfo.states))
+    fileInp.write('pffile {0}\n'.format(speciesInfo.pffile))
+    fileInp.write('mass {0} (amu)\n'.format(speciesInfo.mass))
+
+    ## Writes Transitions
+    ## Finds all fies within a certain window around the range
+    ## Takes into account offset
+    rangemin=range_[0]
+    rangemax=range_[1]
+    
+    rangemin=rounddown(range_[0])
+    rangemax=roundup(range_[1])
+    files=[]
+
+    if not UseSupers:
+        for file_ in speciesInfo.transitions:
+            line=os.path.splitext(os.path.basename(file_))[0]
+            if speciesInfo.molecule != line[:len(speciesInfo.molecule)]:
+                continue
+            line=line.split('__')
+            # Presumably in form of species__source__rangemin-rangmax.trans
+            if len(line) > 2:
+                line=line[2]
+                line=line.split('-')
+                rmin=int(line[0])
+                rmax=int(line[1])
+                if (rmin >= rangemax or rmax <= rangemin):
+                    pass
+                else:
+                    files.append(file_)
+            else: # Files without mins or maxes
+                files.append(file_)
+    else:
+        files=['super{0}_{1}_{2:8.7e}_{3}_{4}{5}.xsec'.format(speciesInfo.molecule,speciesInfo.source,temperature,range_[0],range_[1],note)]
+        
+    if len(files)==1:
+        fileInp.write('Transitions {0}\n'.format(files[0]))
+    else:
+        fileInp.write('Transitions\n')
+        for transfile in files:
+            fileInp.write('  {0}\n'.format(transfile))
+        fileInp.write('end\n\n')
+    # Puts in the terms controlling broadening species, if they exist
+    if peturbers is not None:
+        
+        if isinstance(peturbers,str):
+            peturbers=[peturbers]
+        
+        if len(peturbers) ==1:
+            fileInp.write('Species {0}\n'.format(peturbers[0]))
+        elif len(peturbers) >1:
+            fileInp.write('Species\n')
+            for species in peturbers:
+                fileInp.write('  {0}\n'.format(species))
+            fileInp.write('end\n')
+    fileInp.close()
+
+
+# Creates super-lines for speed-up of calculations
+# Temperature in K
+def SuperLineInpWrite(speciesInfo,temperature,npoints,range_,note='',offset=25, peturbers=None,homedir=os.getcwd()):
+    
+    if homedir[-1] != '/':
+        homedir=homedir+'/'
+
+    filename=homedir+'SuperLine_{0}_{1}_{2:8.7e}_{3}_{4}{5}.inp'.format(speciesInfo.molecule,speciesInfo.source,temperature,range_[0],range_[1],note)
+    #print(filename)
+    fileInp=open(filename,'w')
+
+    fileInp.write('temperature {0:8.7e} (K)\n'.format(float(temperature)))
+    fileInp.write('range {0},{1} (cm-1)\n'.format(range_[0],range_[1]))
+    fileInp.write('npoints {0}\n'.format(npoints))
+
+    #fileInp.write('offset {0}\n'.format(offset))
+    fileInp.write('mem 200 GB\n')
+    fileInp.write('Ncache 10000000\n')
+    fileInp.write('absorption\nthreshold 0\nbin\n')
+    fileInp.write('output super{0}_{1}_{2:8.7e}_{3}_{4}{5}\n'.format(speciesInfo.molecule,speciesInfo.source,temperature,range_[0],range_[1],note))
 
     fileInp.write('nprocs 36\n')
 
@@ -184,19 +270,7 @@ def InpWrite(speciesInfo,temperature,pressure,npoints,range_,note='',offset=25, 
         for transfile in files:
             fileInp.write('  {0}\n'.format(transfile))
         fileInp.write('end\n\n')
-    # Puts in the terms controlling broadening species, if they exist
-    if peturbers is not None:
-        
-        if isinstance(peturbers,str):
-            peturbers=[peturbers]
-        
-        if len(peturbers) ==1:
-            fileInp.write('Species {0}\n'.format(peturbers[0]))
-        elif len(peturbers) >1:
-            fileInp.write('Species\n')
-            for species in peturbers:
-                fileInp.write('  {0}\n'.format(species))
-            fileInp.write('end\n')
+
     fileInp.close()
 
 
