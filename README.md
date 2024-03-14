@@ -24,8 +24,6 @@ After downloading the files that ExoCross needs for the molecule you wish to cal
 
 Edit **submit_job.pbs** for the estimated computation time required.
 
-[Inprogress]
-
 
 # Running Exocross Tools
 
@@ -43,7 +41,10 @@ Please note that this tool set assumes you're running on a system which uses PBS
 5. Between the isotopologues, determine the maximum wavenumber you wish to use. If you want to combine them together, the maximum wavenumber needs to be the same for all isotopologues. 
 6. Download and unzip all .states and .trans files to a folder of your choice.
 7. Download the .pf file. 
-    1. If the file does not exist or the maximum temperature is insufficient, you will need to create one
-6. Modify JobSubmit.py by:
-   1. 
-7. hello
+    1. If the file does not exist or the maximum temperature is insufficient, you will need to create one.
+8. Modify JobSubmit.py by:
+   1. Making a list of isotopologue input classes with the isotopologue masses and isotope numbers for each isotopologue, specifiying the appropriate folder location.
+   2. Define the wavenumber range (in cm^-1) and number of points
+   4. Define the range of Pressure/Temperature points and the number of each unique pressure and temperature points required.
+   5. Modify the control flow at the bottom of the script to specify the number of jobs or if Super-lines are being used.
+9. Run JobSubmit.py. You can use screen to ensure that the job submission occurs automatically in the background.
